@@ -1,12 +1,12 @@
 # Phase 7 — Submission links & project idea
 
-Fill in after deploy / Loom recording.
-
 | Item | Link |
 |------|------|
-| **Vercel** | _pending deploy_ |
-| **GitHub** | _pending push_ |
-| **Loom** | _you record — see script below_ |
+| **Vercel** | https://mentra-sable.vercel.app |
+| **GitHub** | https://github.com/zuhawas4/mentra |
+| **Loom** | _Record and paste your share link here_ |
+
+Health check: https://mentra-sable.vercel.app/api/health
 
 ## Real-world project idea (final two weeks)
 
@@ -25,13 +25,13 @@ Fill in after deploy / Loom recording.
 
 **MVP:** Summary API + PDF/email send + risk badge on students list.
 
-## Loom recording script (you must record this)
+## Loom recording script (you must record)
 
-1. **Web** — Login tutor → dashboard → students/sessions CRUD → payments  
-2. **Canvas** — Open live room → draw on whiteboard → download PNG  
-3. **Realtime** — Second tab same room → chat + board sync; show notification bell  
-4. **Chrome extension** — Overview / Pay / Invoices / Alerts  
-5. **Android** — Expo Go join/login (or screen record emulator)  
-6. **Desktop** — Tauri window login/dashboard/join (if Rust installed; otherwise show project + README run steps)  
+1. **Web** — Open Vercel URL → login (demo or Supabase) → dashboard → students/sessions/payments  
+2. **Canvas** — Live room → draw on whiteboard → download PNG  
+3. **Realtime** — Second tab same room → chat + board sync; notification bell  
+4. **Chrome extension** — Overview / Pay / Invoices / Alerts (App URL = Vercel URL)  
+5. **Android** — Expo Go with App URL = Vercel URL  
+6. **Desktop** — Tauri shell (or show code + README if Rust not installed yet)  
 
-Upload to Loom → paste share link into the table above.
+Upload to [loom.com](https://www.loom.com) → paste share URL into the table above.
