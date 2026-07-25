@@ -1,0 +1,19 @@
+:root {
+  --mentra-background: #f7f7fb;
+  --mentra-surface: #ffffff;
+  --mentra-ink: #20202a;
+  --mentra-muted: #7d7e91;
+  --mentra-border: #e9e9f1;
+  --mentra-primary: #5142d8;
+  --mentra-primary-dark: #382ab5;
+  --mentra-primary-soft: #f0eeff;
+  --mentra-success: #18775a;
+  --mentra-success-soft: #e6f7f0;
+  --mentra-amber: #d67820;
+  --mentra-amber-soft: #fff2e5;
+  --mentra-danger: #c43c3c;
+  --mentra-danger-soft: #fdecec;
+  --mentra-radius: 14px;
+  --mentra-shadow: 0 1px 2px rgba(32, 32, 42, 0.04),
+    0 8px 24px rgba(32, 32, 42, 0.04);
+}

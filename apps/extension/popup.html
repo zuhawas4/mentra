@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mentra</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="header">
+        <div class="mark" aria-hidden="true">M</div>
+        <div>
+          <h1>Mentra</h1>
+          <p>Payments · invoices · live data</p>
+        </div>
+      </header>
+
+      <label class="field">
+        <span>App URL</span>
+        <input id="appUrl" type="url" placeholder="http://localhost:3000" />
+      </label>
+
+      <nav class="tabs" role="tablist">
+        <button type="button" class="tab active" data-tab="overview">Overview</button>
+        <button type="button" class="tab" data-tab="payment">Pay</button>
+        <button type="button" class="tab" data-tab="invoices">Invoices</button>
+        <button type="button" class="tab" data-tab="alerts">Alerts</button>
+      </nav>
+
+      <section class="panel active" id="panel-overview">
+        <div class="stats">
+          <div><span id="statStudents">—</span><small>Students</small></div>
+          <div><span id="statSessions">—</span><small>Sessions</small></div>
+          <div><span id="statOpen">—</span><small>Open $</small></div>
+        </div>
+        <p id="healthLine" class="muted">Loading app data…</p>
+        <div class="actions">
+          <button id="dashboardBtn" type="button" class="primary">Open dashboard</button>
+          <button id="paymentsPageBtn" type="button" class="ghost">Open payments page</button>
+          <button id="refreshBtn" type="button" class="ghost">Refresh data</button>
+        </div>
+      </section>
+
+      <section class="panel" id="panel-payment">
+        <label class="field">
+          <span>Student name</span>
+          <input id="payStudent" type="text" placeholder="Daniel Miller" list="studentList" />
+          <datalist id="studentList"></datalist>
+        </label>
+        <label class="field">
+          <span>Invoice title</span>
+          <input id="payTitle" type="text" value="Tutoring invoice" />
+        </label>
+        <label class="field">
+          <span>Amount (USD)</span>
+          <input id="payAmount" type="number" min="0" step="0.01" value="80" />
+        </label>
+        <label class="field">
+          <span>Notes</span>
+          <input id="payNotes" type="text" placeholder="Bank transfer / card" />
+        </label>
+        <label class="field">
+          <span>Status</span>
+          <select id="payStatus">
+            <option value="sent">Sent</option>
+            <option value="paid">Paid</option>
+            <option value="draft">Draft</option>
+            <option value="overdue">Overdue</option>
+          </select>
+        </label>
+        <button id="recordPayBtn" type="button" class="primary">Record payment in Mentra</button>
+        <p class="hint">Opens Mentra Payments with fields filled so you can save in one click.</p>
+      </section>
+
+      <section class="panel" id="panel-invoices">
+        <ul id="invoiceList" class="list"></ul>
+        <button id="viewAllInvoicesBtn" type="button" class="ghost">View all invoices</button>
+      </section>
+
+      <section class="panel" id="panel-alerts">
+        <ul id="alertList" class="list"></ul>
+        <div class="actions">
+          <button id="notifyBtn" type="button" class="primary">Open notifications</button>
+          <button id="joinBtn" type="button" class="ghost">Quick join session</button>
+        </div>
+        <label class="field">
+          <span>Join code</span>
+          <input id="joinCode" type="text" maxlength="8" placeholder="CALC32" />
+        </label>
+      </section>
+    </main>
+    <script src="popup.js" type="module"></script>
+  </body>
+</html>

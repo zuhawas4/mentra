@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mentra Desktop</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside>
+        <div class="brand">Mentra</div>
+        <p class="muted">Desktop shell (Tauri + Rust)</p>
+        <label>
+          App URL
+          <input id="appUrl" type="url" value="http://localhost:3000" />
+        </label>
+        <label>
+          Join code
+          <input id="joinCode" type="text" value="CALC32" maxlength="8" />
+        </label>
+        <button id="joinBtn" type="button">Join session</button>
+        <button id="dashBtn" type="button" class="ghost">Dashboard</button>
+        <button id="loginBtn" type="button" class="ghost">Login</button>
+        <p id="status" class="muted">Ready</p>
+      </aside>
+      <main>
+        <iframe id="frame" title="Mentra" src="about:blank"></iframe>
+      </main>
+    </div>
+    <script type="module" src="main.js"></script>
+  </body>
+</html>

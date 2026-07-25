@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="480" viewBox="0 0 800 480" fill="none">
+  <rect width="800" height="480" fill="#FFFFFF"/>
+  <path d="M80 320 C160 120, 240 360, 320 200 S480 120, 720 280" stroke="#5142D8" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <path d="M100 360 C220 220, 300 340, 420 240 S600 200, 740 330" stroke="#18775A" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <text x="80" y="70" fill="#20202A" font-family="Manrope, Arial, sans-serif" font-size="28" font-weight="600">Mentra board snapshot</text>
+  <text x="80" y="104" fill="#7D7E91" font-family="Manrope, Arial, sans-serif" font-size="16">Integration by parts � demo</text>
+</svg>

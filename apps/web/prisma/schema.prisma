@@ -1,0 +1,173 @@
+// Mentra Prisma schema — mirrors supabase/migrations SQL.
+// Auth users live in Supabase `auth.users`; profiles.id matches that UUID.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum UserRole {
+  tutor
+  student
+
+  @@map("user_role")
+}
+
+enum SessionStatus {
+  scheduled
+  live
+  completed
+  cancelled
+
+  @@map("session_status")
+}
+
+enum PaymentStatus {
+  draft
+  sent
+  paid
+  overdue
+  cancelled
+
+  @@map("payment_status")
+}
+
+model Profile {
+  id             String   @id @db.Uuid
+  fullName       String   @map("full_name")
+  email          String
+  avatarUrl      String?  @map("avatar_url")
+  role           UserRole @default(tutor)
+  primarySubject String?  @map("primary_subject")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  tutoredStudents Student[]         @relation("TutorStudents")
+  linkedStudent   Student?          @relation("LinkedUser")
+  tutoredSessions StudySession[]    @relation("TutorSessions")
+  notes           SessionNote[]
+  chatMessages    ChatMessage[]
+  invoices        PaymentInvoice[]
+
+  @@map("profiles")
+}
+
+model Student {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tutorId   String   @map("tutor_id") @db.Uuid
+  userId    String?  @unique @map("user_id") @db.Uuid
+  fullName  String   @map("full_name")
+  email     String?
+  avatarUrl String?  @map("avatar_url")
+  subjects  String[] @default([])
+  notes     String?
+  progress  Int      @default(0)
+  status    String   @default("active")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  tutor    Profile          @relation("TutorStudents", fields: [tutorId], references: [id], onDelete: Cascade)
+  user     Profile?         @relation("LinkedUser", fields: [userId], references: [id], onDelete: SetNull)
+  sessions StudySession[]
+  invoices PaymentInvoice[]
+
+  @@index([tutorId], map: "students_tutor_id_idx")
+  @@map("students")
+}
+
+model StudySession {
+  id               String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tutorId          String        @map("tutor_id") @db.Uuid
+  studentId        String?       @map("student_id") @db.Uuid
+  title            String
+  topic            String?
+  scheduledAt      DateTime      @map("scheduled_at") @db.Timestamptz(6)
+  startedAt        DateTime?     @map("started_at") @db.Timestamptz(6)
+  endedAt          DateTime?     @map("ended_at") @db.Timestamptz(6)
+  durationMinutes  Int?          @default(60) @map("duration_minutes")
+  status           SessionStatus @default(scheduled)
+  guestJoinCode    String?       @unique @map("guest_join_code")
+  boardSnapshotUrl String?       @map("board_snapshot_url")
+  agenda           String?
+  createdAt        DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  tutor    Profile         @relation("TutorSessions", fields: [tutorId], references: [id], onDelete: Cascade)
+  student  Student?        @relation(fields: [studentId], references: [id], onDelete: SetNull)
+  notes    SessionNote[]
+  strokes  BoardStroke[]
+  messages ChatMessage[]
+
+  @@index([tutorId], map: "sessions_tutor_id_idx")
+  @@index([guestJoinCode], map: "sessions_guest_code_idx")
+  @@map("study_sessions")
+}
+
+model SessionNote {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sessionId String   @map("session_id") @db.Uuid
+  authorId  String   @map("author_id") @db.Uuid
+  content   String   @default("")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  session StudySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  author  Profile      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@map("session_notes")
+}
+
+model BoardStroke {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sessionId String   @map("session_id") @db.Uuid
+  authorId  String   @map("author_id")
+  points    Json
+  color     String
+  width     Decimal  @db.Decimal
+  tool      String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  session StudySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId], map: "board_strokes_session_id_idx")
+  @@map("board_strokes")
+}
+
+model ChatMessage {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sessionId String   @map("session_id") @db.Uuid
+  authorId  String   @map("author_id") @db.Uuid
+  authorName String  @map("author_name")
+  body      String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  session StudySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  author  Profile      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId], map: "chat_messages_session_id_idx")
+  @@map("chat_messages")
+}
+
+model PaymentInvoice {
+  id           String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tutorId      String        @map("tutor_id") @db.Uuid
+  studentId    String?       @map("student_id") @db.Uuid
+  studentName  String        @map("student_name")
+  title        String
+  amountCents  Int           @map("amount_cents")
+  currency     String        @default("USD")
+  status       PaymentStatus @default(draft)
+  dueAt        DateTime?     @map("due_at") @db.Timestamptz(6)
+  paidAt       DateTime?     @map("paid_at") @db.Timestamptz(6)
+  notes        String?
+  createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tutor   Profile  @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+  student Student? @relation(fields: [studentId], references: [id], onDelete: SetNull)
+
+  @@index([tutorId], map: "payment_invoices_tutor_id_idx")
+  @@map("payment_invoices")
+}

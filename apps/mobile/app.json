@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "Mentra",
+    "slug": "mentra",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#5142D8"
+    },
+    "android": {
+      "package": "app.mentra.mobile",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#5142D8"
+      }
+    },
+    "ios": {
+      "bundleIdentifier": "app.mentra.mobile",
+      "supportsTablet": true
+    },
+    "extra": {
+      "mentraAppUrl": "http://localhost:3000"
+    }
+  }
+}

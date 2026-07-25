@@ -1,0 +1,27 @@
+{
+  "name": "mentra",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Mentra — realtime collaborative whiteboard and tutoring session manager",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @mentra/web",
+    "build": "npm run build -w @mentra/web",
+    "start": "npm run start -w @mentra/web",
+    "lint": "npm run lint -w @mentra/web",
+    "typecheck": "npm run typecheck -w @mentra/web",
+    "mobile": "npm run start -w @mentra/mobile",
+    "desktop": "npm run dev -w @mentra/desktop",
+    "prisma:generate": "npm run prisma:generate -w @mentra/web"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.12.3",
+    "@supabase/supabase-js": "^2.110.8"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Mentra Session Companion",
+  "description": "Record tutoring payments, view invoices, receive Mentra alerts, and inspect live app data.",
+  "version": "0.1.0",
+  "action": {
+    "default_title": "Mentra",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "permissions": ["storage", "alarms", "notifications"],
+  "host_permissions": ["http://localhost:3000/*", "https://*.vercel.app/*"],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
