@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
-  "installCommand": "npm install",
+  "installCommand": "npm install && npm install @tailwindcss/oxide-linux-x64-gnu@4.3.3 -w @mentra/web --no-save",
   "buildCommand": "npm run build -w @mentra/web"
 }
