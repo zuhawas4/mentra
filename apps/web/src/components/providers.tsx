@@ -47,13 +47,15 @@ function ReduxProvider({ children }: { children: React.ReactNode }) {
 
 export function Providers({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    const unsub = useDemoStore.persist.onFinishHydration(() => {
-      useDemoStore.setState({ hydrated: true });
-    });
-    if (useDemoStore.persist.hasHydrated()) {
-      useDemoStore.setState({ hydrated: true });
-    }
-    return unsub;
+    const mark = () => useDemoStore.setState({ hydrated: true });
+    const unsub = useDemoStore.persist.onFinishHydration(mark);
+    if (useDemoStore.persist.hasHydrated()) mark();
+    // Safety: never leave AuthGate on an infinite skeleton (blocked storage, etc.)
+    const fallback = window.setTimeout(mark, 1200);
+    return () => {
+      unsub();
+      window.clearTimeout(fallback);
+    };
   }, []);
 
   return (

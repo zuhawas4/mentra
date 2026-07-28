@@ -4,13 +4,17 @@ Manifest V3 companion for payments, invoices, notifications, and app data.
 
 ## Useful actions
 
-1. **Record a payment / invoice** — Pay tab fills Mentra `/payments` (and POSTs when you are logged in).
+1. **Record a payment / invoice** — Pay tab opens Mentra `/payments` with fields filled (instant).
 2. **View invoices** — Invoices tab lists amounts/status from `/api/extension/snapshot`.
-3. **Receive notifications** — Background alarm reminds you about overdue invoices; Alerts tab links to Mentra notifications + live sessions.
-4. **Assess application data** — Overview shows student/session counts, open balance, and health (demo vs Supabase+Prisma).
+3. **Alerts** — Shortcuts to notifications + quick join by code.
+4. **App data** — Overview shows student/session counts and health.
 
-## Load unpacked
+## Load / reload after updates
 
-1. Run Mentra: `npm run dev` (repo root).
-2. Chrome → `chrome://extensions` → Developer mode → **Load unpacked** → `apps/extension`.
-3. Set **App URL** to `http://localhost:3000` or your Vercel URL.
+1. Chrome → `chrome://extensions`
+2. Enable **Developer mode**
+3. **Load unpacked** → select `apps/extension`  
+   Or click **Reload** on the Mentra card if already loaded.
+4. Set **App URL** to `https://mentra-sable.vercel.app` (default) or `http://localhost:3000` for local.
+
+Buttons open Mentra in a new tab immediately and do **not** wait on slow API calls.

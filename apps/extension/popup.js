@@ -1,10 +1,11 @@
-const DEFAULT_APP = "http://localhost:3000";
+const DEFAULT_APP = "https://mentra-sable.vercel.app";
 
 const appUrlInput = document.getElementById("appUrl");
 const healthLine = document.getElementById("healthLine");
 const invoiceList = document.getElementById("invoiceList");
 const alertList = document.getElementById("alertList");
 const studentList = document.getElementById("studentList");
+const openStatus = document.getElementById("openStatus");
 
 function money(cents, currency = "USD") {
   try {
@@ -19,7 +20,47 @@ function money(cents, currency = "USD") {
 }
 
 function normalizeBase(url) {
-  return (url || DEFAULT_APP).replace(/\/$/, "");
+  let raw = (url || DEFAULT_APP).trim();
+  if (!raw || /localhost|127\.0\.0\.1/i.test(raw)) raw = DEFAULT_APP;
+  if (!/^https?:\/\//i.test(raw)) raw = `https://${raw}`;
+  return raw.replace(/\/$/, "");
+}
+
+function currentBase() {
+  return normalizeBase(appUrlInput?.value || DEFAULT_APP);
+}
+
+/**
+ * Open Mentra in a new tab via the service worker.
+ * This is reliable in MV3 (popup often closes mid chrome.tabs.create).
+ */
+function openApp(path) {
+  const base = currentBase();
+  const cleanPath = path.startsWith("/") ? path : `/${path}`;
+  const url = `${base}${cleanPath}`;
+
+  if (openStatus) openStatus.textContent = `Opening ${cleanPath}…`;
+
+  void chrome.storage.sync.set({
+    appUrl: base,
+    lastJoinCode:
+      document.getElementById("joinCode")?.value.trim().toUpperCase() ||
+      "CALC32",
+    lastStudent: document.getElementById("payStudent")?.value.trim() || "",
+  });
+
+  chrome.runtime.sendMessage({ type: "OPEN_TAB", url }, (response) => {
+    const err = chrome.runtime.lastError;
+    if (err || !response?.ok) {
+      // Fallback if messaging fails
+      chrome.tabs.create({ url, active: true });
+    }
+    if (openStatus) {
+      openStatus.textContent = err
+        ? `Could not open tab: ${err.message}`
+        : `Opened ${url}`;
+    }
+  });
 }
 
 async function loadSettings() {
@@ -28,23 +69,14 @@ async function loadSettings() {
     lastJoinCode: "CALC32",
     lastStudent: "Daniel Miller",
   });
-  appUrlInput.value = stored.appUrl;
+  let appUrl = stored.appUrl || DEFAULT_APP;
+  if (/localhost|127\.0\.0\.1/i.test(appUrl)) {
+    appUrl = DEFAULT_APP;
+    void chrome.storage.sync.set({ appUrl });
+  }
+  appUrlInput.value = appUrl;
   document.getElementById("joinCode").value = stored.lastJoinCode;
   document.getElementById("payStudent").value = stored.lastStudent;
-}
-
-async function saveSettings(extra = {}) {
-  await chrome.storage.sync.set({
-    appUrl: normalizeBase(appUrlInput.value),
-    lastJoinCode: document.getElementById("joinCode").value.trim().toUpperCase(),
-    lastStudent: document.getElementById("payStudent").value.trim(),
-    ...extra,
-  });
-}
-
-function openApp(path) {
-  const base = normalizeBase(appUrlInput.value);
-  chrome.tabs.create({ url: `${base}${path}` });
 }
 
 function renderSnapshot(data) {
@@ -127,61 +159,72 @@ function renderSnapshot(data) {
 }
 
 async function refreshSnapshot() {
-  const base = normalizeBase(appUrlInput.value);
+  const base = currentBase();
   healthLine.textContent = "Loading app data…";
+
+  try {
+    const cached = await chrome.storage.local.get("lastSnapshot");
+    if (cached.lastSnapshot) renderSnapshot(cached.lastSnapshot);
+  } catch {
+    /* ignore */
+  }
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 4000);
+
   try {
     const res = await fetch(`${base}/api/extension/snapshot`, {
-      credentials: "include",
+      credentials: "omit",
+      signal: controller.signal,
+      cache: "no-store",
     });
-    if (!res.ok) throw new Error("bad status");
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     renderSnapshot(data);
     await chrome.storage.local.set({ lastSnapshot: data });
-  } catch (err) {
+  } catch {
     healthLine.textContent =
-      "App unreachable. Start Mentra (`npm run dev`) or set your Vercel URL.";
-    const cached = await chrome.storage.local.get("lastSnapshot");
-    if (cached.lastSnapshot) renderSnapshot(cached.lastSnapshot);
+      "Could not refresh data. Buttons still open Mentra — check App URL.";
+  } finally {
+    clearTimeout(timer);
   }
 }
 
 document.querySelectorAll(".tab").forEach((tab) => {
   tab.addEventListener("click", () => {
-    document.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));
-    document.querySelectorAll(".panel").forEach((p) => p.classList.remove("active"));
+    document
+      .querySelectorAll(".tab")
+      .forEach((t) => t.classList.remove("active"));
+    document
+      .querySelectorAll(".panel")
+      .forEach((p) => p.classList.remove("active"));
     tab.classList.add("active");
     document.getElementById(`panel-${tab.dataset.tab}`).classList.add("active");
   });
 });
 
-document.getElementById("dashboardBtn").addEventListener("click", async () => {
-  await saveSettings();
+document.getElementById("dashboardBtn").addEventListener("click", () => {
   openApp("/dashboard");
 });
-document.getElementById("paymentsPageBtn").addEventListener("click", async () => {
-  await saveSettings();
+document.getElementById("paymentsPageBtn").addEventListener("click", () => {
   openApp("/payments");
 });
-document.getElementById("viewAllInvoicesBtn").addEventListener("click", async () => {
-  await saveSettings();
+document.getElementById("viewAllInvoicesBtn").addEventListener("click", () => {
   openApp("/payments");
 });
-document.getElementById("notifyBtn").addEventListener("click", async () => {
-  await saveSettings();
+document.getElementById("notifyBtn").addEventListener("click", () => {
   openApp("/notifications");
 });
-document.getElementById("refreshBtn").addEventListener("click", async () => {
-  await saveSettings();
-  await refreshSnapshot();
+document.getElementById("refreshBtn").addEventListener("click", () => {
+  void chrome.storage.sync.set({ appUrl: currentBase() });
+  void refreshSnapshot();
 });
-document.getElementById("joinBtn").addEventListener("click", async () => {
-  await saveSettings();
+document.getElementById("joinBtn").addEventListener("click", () => {
   const code = document.getElementById("joinCode").value.trim().toUpperCase();
   openApp(`/join/${encodeURIComponent(code || "CALC32")}`);
 });
 
-document.getElementById("recordPayBtn").addEventListener("click", async () => {
-  await saveSettings();
+document.getElementById("recordPayBtn").addEventListener("click", () => {
   const student = document.getElementById("payStudent").value.trim();
   const title = document.getElementById("payTitle").value.trim();
   const amount = document.getElementById("payAmount").value.trim();
@@ -195,31 +238,14 @@ document.getElementById("recordPayBtn").addEventListener("click", async () => {
     status,
   });
   openApp(`/payments?${qs.toString()}`);
-
-  // Also try authenticated API create when the tutor is logged into Mentra.
-  const base = normalizeBase(appUrlInput.value);
-  try {
-    await fetch(`${base}/api/payments`, {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        studentName: student,
-        title,
-        amountCents: Math.round(Number(amount) * 100),
-        notes,
-        status,
-      }),
-    });
-  } catch {
-    /* demo / CORS / offline — page open still works */
-  }
 });
 
-appUrlInput.addEventListener("change", async () => {
-  await saveSettings();
+appUrlInput.addEventListener("change", () => {
+  void chrome.storage.sync.set({ appUrl: currentBase() });
+  void refreshSnapshot();
+});
+
+void (async () => {
+  await loadSettings();
   await refreshSnapshot();
-});
-
-await loadSettings();
-await refreshSnapshot();
+})();
